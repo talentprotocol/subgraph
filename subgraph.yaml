@@ -1,0 +1,32 @@
+specVersion: 0.0.1
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: TalentFactory
+    network: celo-alfajores
+    source:
+      address: "0xcF2b5dd4367B083d495Cfc4332b0970464ee1472"
+      abi: TalentFactory
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - RoleAdminChanged
+        - RoleGranted
+        - RoleRevoked
+        - TalentCreated
+      abis:
+        - name: TalentFactory
+          file: ./abis/TalentFactory.json
+      eventHandlers:
+        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
+          handler: handleRoleAdminChanged
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+        - event: TalentCreated(indexed address,indexed address)
+          handler: handleTalentCreated
+      file: ./src/mapping.ts
