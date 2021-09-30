@@ -1,73 +1,125 @@
 import { BigInt } from "@graphprotocol/graph-ts"
-import {
-  TalentFactory,
-  RoleAdminChanged,
-  RoleGranted,
-  RoleRevoked,
-  TalentCreated
-} from "../generated/TalentFactory/TalentFactory"
-import { ExampleEntity } from "../generated/schema"
+import { TalentFactory, TalentToken, Sponsor, SponsorTalentToken } from "../generated/schema"
+import * as TalentTokenTemplates from "../generated/templates/TalentToken/TalentToken"
+import * as Templates from "../generated/templates"
+import { TalentCreated } from "../generated/TalentFactory/TalentFactory"
+import { Transfer } from "../generated/templates/TalentToken/TalentToken"
+import { Stake, Unstake } from "../generated/Staking/Staking"
 
-export function handleRoleAdminChanged(event: RoleAdminChanged): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from.toHex())
+const FACTORY_ADDRESS = '0xcF2b5dd4367B083d495Cfc4332b0970464ee1472'
+const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
+const ZERO_BI = BigInt.fromI32(0)
+const ONE_BI = BigInt.fromI32(1)
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (!entity) {
-    entity = new ExampleEntity(event.transaction.from.toHex())
-
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
+export function handleTalentTokenCreated(event: TalentCreated): void {
+  let factory = TalentFactory.load(FACTORY_ADDRESS)
+  // load factory
+  if (factory === null) {
+    factory = new TalentFactory(FACTORY_ADDRESS)
+    factory.talentCount = ZERO_BI
+    factory.owner = ADDRESS_ZERO
   }
 
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
+  factory.talentCount = factory.talentCount.plus(ONE_BI)
+  factory.save()
 
-  // Entity fields can be set based on event parameters
-  entity.role = event.params.role
-  entity.previousAdminRole = event.params.previousAdminRole
+  let talentToken = new TalentToken(event.params.token.toHex())
+  talentToken.owner = event.params.talent.toHex()
+  talentToken.sponsorCounter = ZERO_BI
+  talentToken.txCount = ZERO_BI
+  talentToken.totalValueLocked = ZERO_BI
 
-  // Entities can be written to the store with `.save()`
-  entity.save()
+  Templates.TalentToken.create(event.params.token)
 
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.DEFAULT_ADMIN_ROLE(...)
-  // - contract.INITIAL_SUPPLY(...)
-  // - contract.ROLE_MINTER(...)
-  // - contract.createTalent(...)
-  // - contract.getRoleAdmin(...)
-  // - contract.getRoleMember(...)
-  // - contract.getRoleMemberCount(...)
-  // - contract.hasRole(...)
-  // - contract.implementationBeacon(...)
-  // - contract.isSymbol(...)
-  // - contract.isTalentToken(...)
-  // - contract.minter(...)
-  // - contract.supportsInterface(...)
-  // - contract.symbolsToTokens(...)
-  // - contract.talentToToken(...)
-  // - contract.talentsToTokens(...)
-  // - contract.tokensToTalents(...)
+  talentToken.save()
+  factory.save()
 }
 
-export function handleRoleGranted(event: RoleGranted): void {}
+export function handleTransfer(event: Transfer): void {
+  let contract = TalentTokenTemplates.TalentToken.bind(event.address)
 
-export function handleRoleRevoked(event: RoleRevoked): void {}
+  let talentToken = TalentToken.load(event.address.toHex())
+  if(talentToken === null) {
+    talentToken = new TalentToken(event.address.toHex())
+  }
 
-export function handleTalentCreated(event: TalentCreated): void {}
+  talentToken.symbol = contract.symbol()
+  talentToken.decimals = BigInt.fromI32(contract.decimals())
+  talentToken.name = contract.name()
+  talentToken.maxSupply = contract.MAX_SUPPLY()
+  talentToken.totalSupply = contract.totalSupply()
+  talentToken.txCount = talentToken.txCount.plus(ONE_BI);
+
+  talentToken.save()
+}
+
+export function handleStake(event: Stake): void {
+  let talentToken = TalentToken.load(event.params.talentToken.toHex())
+  if(talentToken === null) {
+    talentToken = new TalentToken(event.params.talentToken.toHex())
+    talentToken.sponsorCounter = ZERO_BI
+    talentToken.totalValueLocked = ZERO_BI
+  }
+
+  talentToken.sponsorCounter = talentToken.sponsorCounter.plus(ONE_BI)
+  talentToken.totalValueLocked = talentToken.totalValueLocked.plus(event.params.talAmount)
+
+  let sponsor = Sponsor.load(event.params.owner.toHex())
+  if(sponsor === null) {
+    sponsor = new Sponsor(event.params.owner.toHex())
+    sponsor.totalAmount = ZERO_BI
+  }
+
+  sponsor.totalAmount = sponsor.totalAmount.plus(event.params.talAmount)
+
+  let relationshipID = event.params.owner.toHexString() + "-" + event.params.talentToken.toHexString()
+  let sponsorTalentRelationship = SponsorTalentToken.load(relationshipID)
+  if (sponsorTalentRelationship === null) {
+    sponsorTalentRelationship = new SponsorTalentToken(relationshipID)
+    sponsorTalentRelationship.sponsor = sponsor.id
+    sponsorTalentRelationship.talent = talentToken.id
+    sponsorTalentRelationship.amount = ZERO_BI
+  }
+  sponsorTalentRelationship.amount = sponsorTalentRelationship.amount.plus(event.params.talAmount)
+
+  talentToken.save()
+  sponsor.save()
+  sponsorTalentRelationship.save()
+}
+
+export function handleUnstake(event: Unstake): void {
+  let talentToken = TalentToken.load(event.params.talentToken.toHex())
+  if(talentToken === null) {
+    talentToken = new TalentToken(event.params.talentToken.toHex())
+    talentToken.sponsorCounter = ZERO_BI
+    talentToken.totalValueLocked = ZERO_BI
+  }
+
+  talentToken.totalValueLocked = talentToken.totalValueLocked.minus(event.params.talAmount)
+
+  let sponsor = Sponsor.load(event.params.owner.toHex())
+  if(sponsor === null) {
+    sponsor = new Sponsor(event.params.owner.toHex())
+    sponsor.totalAmount = ZERO_BI
+  }
+
+  sponsor.totalAmount = sponsor.totalAmount.minus(event.params.talAmount)
+
+  if (sponsor.totalAmount <= ZERO_BI) {
+    talentToken.sponsorCounter = talentToken.sponsorCounter.minus(ONE_BI)
+  }
+
+  let relationshipID = event.params.owner.toHexString() + "-" + event.params.talentToken.toHexString()
+  let sponsorTalentRelationship = SponsorTalentToken.load(relationshipID)
+  if (sponsorTalentRelationship === null) {
+    sponsorTalentRelationship = new SponsorTalentToken(relationshipID)
+    sponsorTalentRelationship.sponsor = sponsor.id
+    sponsorTalentRelationship.talent = talentToken.id
+    sponsorTalentRelationship.amount = ZERO_BI
+  }
+  sponsorTalentRelationship.amount = sponsorTalentRelationship.amount.minus(event.params.talAmount)
+
+  talentToken.save()
+  sponsor.save()
+  sponsorTalentRelationship.save()
+}

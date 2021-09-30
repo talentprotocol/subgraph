@@ -1,4 +1,4 @@
-specVersion: 0.0.1
+specVersion: 0.0.2
 schema:
   file: ./schema.graphql
 dataSources:
@@ -8,25 +8,58 @@ dataSources:
     source:
       address: "0xcF2b5dd4367B083d495Cfc4332b0970464ee1472"
       abi: TalentFactory
+      startBlock: 7497000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - RoleAdminChanged
-        - RoleGranted
-        - RoleRevoked
-        - TalentCreated
+        - Talent
       abis:
         - name: TalentFactory
           file: ./abis/TalentFactory.json
       eventHandlers:
-        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
-          handler: handleRoleAdminChanged
-        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
-          handler: handleRoleGranted
-        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
-          handler: handleRoleRevoked
         - event: TalentCreated(indexed address,indexed address)
-          handler: handleTalentCreated
+          handler: handleTalentTokenCreated
       file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Staking
+    network: celo-alfajores
+    source:
+      address: "0xaAe247516e1e8C9744cE2de6C4dFef282FCf5753"
+      abi: Staking
+      startBlock: 7497000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Talent
+      abis:
+        - name: Staking
+          file: ./abis/Staking.json
+      eventHandlers:
+        - event: Stake(indexed address,indexed address,uint256,bool)
+          handler: handleStake
+        - event: Unstake(indexed address,indexed address,uint256)
+          handler: handleUnstake
+      file: ./src/mapping.ts
+templates:
+  - name: TalentToken
+    kind: ethereum/contract
+    network: celo-alfajores
+    source:
+      abi: TalentToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      entities:
+        - TalentToken
+      abis:
+        - name: TalentToken
+          file: ./abis/TalentToken.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer

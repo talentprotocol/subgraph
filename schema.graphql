@@ -1,6 +1,49 @@
-type ExampleEntity @entity {
+type TalentFactory @entity {
+  # factory address
   id: ID!
-  count: BigInt!
-  role: Bytes! # bytes32
-  previousAdminRole: Bytes! # bytes32
+  # amount of talent tokens created
+  talentCount: BigInt!
+  # current owner of the factory
+  owner: ID!
+}
+
+type Sponsor @entity {
+  id: ID!
+  totalAmount: BigInt!
+  talents: [SponsorTalentToken!]! @derivedFrom(field: "sponsor")
+}
+
+type SponsorTalentToken @entity {
+  id: ID!
+  talent: TalentToken!
+  sponsor: Sponsor!
+  amount: BigInt!
+}
+
+type TalentToken @entity {
+  # token address
+  id: ID!
+  # talent address
+  owner: ID!
+  # token symbol
+  symbol: String!
+  # token name
+  name: String!
+  # token decimals
+  decimals: BigInt!
+  # token max supply
+  maxSupply: BigInt!
+  # token total supply
+  totalSupply: BigInt!
+  # creation
+  createdAtTimestamp: BigInt!
+  # block stake was created at
+  createdAtBlockNumber: BigInt!
+  # all transactions for this token
+  txCount: BigInt!
+  # all users that have a tokens
+  sponsorCounter: BigInt!
+  # total value locked
+  totalValueLocked: BigInt!
+  sponsors: [SponsorTalentToken!]! @derivedFrom(field: "talent")
 }
