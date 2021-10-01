@@ -10,6 +10,7 @@ const FACTORY_ADDRESS = '0xcF2b5dd4367B083d495Cfc4332b0970464ee1472'
 const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 const ZERO_BI = BigInt.fromI32(0)
 const ONE_BI = BigInt.fromI32(1)
+const FIVE_BI = BigInt.fromI32(5)
 
 export function handleTalentTokenCreated(event: TalentCreated): void {
   let factory = TalentFactory.load(FACTORY_ADDRESS)
@@ -63,6 +64,7 @@ export function handleStake(event: Stake): void {
 
   talentToken.sponsorCounter = talentToken.sponsorCounter.plus(ONE_BI)
   talentToken.totalValueLocked = talentToken.totalValueLocked.plus(event.params.talAmount)
+  talentToken.marketCap = talentToken.marketCap.plus(event.params.talAmount.div(FIVE_BI))
 
   let sponsor = Sponsor.load(event.params.owner.toHex())
   if(sponsor === null) {
@@ -80,7 +82,8 @@ export function handleStake(event: Stake): void {
     sponsorTalentRelationship.talent = talentToken.id
     sponsorTalentRelationship.amount = ZERO_BI
   }
-  sponsorTalentRelationship.amount = sponsorTalentRelationship.amount.plus(event.params.talAmount)
+  sponsorTalentRelationship.talAmount = sponsorTalentRelationship.amount.plus(event.params.talAmount)
+  sponsorTalentRelationship.amount = sponsorTalentRelationship.amount.plus(event.params.talAmount.div(FIVE_BI))
 
   talentToken.save()
   sponsor.save()

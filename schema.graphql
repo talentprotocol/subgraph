@@ -18,6 +18,7 @@ type SponsorTalentToken @entity {
   talent: TalentToken!
   sponsor: Sponsor!
   amount: BigInt!
+  talAmount: BigInt!
 }
 
 type TalentToken @entity {
@@ -35,6 +36,8 @@ type TalentToken @entity {
   maxSupply: BigInt!
   # token total supply
   totalSupply: BigInt!
+  # market cap
+  marketCap: BigInt!
   # creation
   createdAtTimestamp: BigInt!
   # block stake was created at
