@@ -6,7 +6,7 @@ dataSources:
     name: TalentFactory
     network: celo-alfajores
     source:
-      address: "0xcF2b5dd4367B083d495Cfc4332b0970464ee1472"
+      address: "0x6a630d53ABb7c17E51f7B67743e1502C3Ecc9360"
       abi: TalentFactory
       startBlock: 7497000
     mapping:
@@ -26,7 +26,7 @@ dataSources:
     name: Staking
     network: celo-alfajores
     source:
-      address: "0xaAe247516e1e8C9744cE2de6C4dFef282FCf5753"
+      address: "0x29270C602C0659260D555Ecd0b4F62eAb2c964Ef"
       abi: Staking
       startBlock: 7497000
     mapping:
@@ -43,6 +43,8 @@ dataSources:
           handler: handleStake
         - event: Unstake(indexed address,indexed address,uint256)
           handler: handleUnstake
+        - event: RewardClaim(indexed address,indexed address,uint256,uint256)
+          handler: handleRewardClaim
       file: ./src/mapping.ts
 templates:
   - name: TalentToken

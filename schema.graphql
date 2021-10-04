@@ -9,7 +9,7 @@ type TalentFactory @entity {
 
 type Sponsor @entity {
   id: ID!
-  totalAmount: BigInt!
+  totalAmount: BigDecimal!
   talents: [SponsorTalentToken!]! @derivedFrom(field: "sponsor")
 }
 
@@ -17,8 +17,8 @@ type SponsorTalentToken @entity {
   id: ID!
   talent: TalentToken!
   sponsor: Sponsor!
-  amount: BigInt!
-  talAmount: BigInt!
+  amount: BigDecimal!
+  talAmount: BigDecimal!
 }
 
 type TalentToken @entity {
