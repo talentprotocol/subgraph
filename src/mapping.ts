@@ -12,9 +12,7 @@ const ZERO_BI = BigInt.fromI32(0)
 const ONE_BI = BigInt.fromI32(1)
 const FIVE_BI = BigInt.fromI32(5)
 const INITIAL_SUPPLY_BI = BigInt.fromString("10000000000000000000000")
-const EXP_18 = BigDecimal.fromString('1000000000000000000')
 const ZERO_BD = BigDecimal.fromString('0')
-const ONE_BD = BigDecimal.fromString('1')
 
 export function handleTalentTokenCreated(event: TalentCreated): void {
   let factory = TalentFactory.load(FACTORY_ADDRESS)
@@ -33,6 +31,7 @@ export function handleTalentTokenCreated(event: TalentCreated): void {
   talentToken.supporterCounter = ZERO_BI
   talentToken.txCount = ZERO_BI
   talentToken.totalValueLocked = INITIAL_SUPPLY_BI
+  talentToken.marketCap = INITIAL_SUPPLY_BI.div(FIVE_BI);
 
   Templates.TalentToken.create(event.params.token)
 
@@ -64,6 +63,7 @@ export function handleStake(event: Stake): void {
     talentToken = new TalentToken(event.params.talentToken.toHex())
     talentToken.supporterCounter = ZERO_BI
     talentToken.totalValueLocked = INITIAL_SUPPLY_BI
+    talentToken.marketCap = INITIAL_SUPPLY_BI.div(FIVE_BI)
   }
 
   talentToken.totalValueLocked = talentToken.totalValueLocked.plus(event.params.talAmount)
@@ -99,7 +99,8 @@ export function handleUnstake(event: Unstake): void {
   if(talentToken === null) {
     talentToken = new TalentToken(event.params.talentToken.toHex())
     talentToken.supporterCounter = ZERO_BI
-    talentToken.totalValueLocked = ZERO_BI
+    talentToken.totalValueLocked = INITIAL_SUPPLY_BI
+    talentToken.marketCap = INITIAL_SUPPLY_BI.div(FIVE_BI)
   }
 
   talentToken.totalValueLocked = talentToken.totalValueLocked.minus(event.params.talAmount)
