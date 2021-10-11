@@ -7,16 +7,16 @@ type TalentFactory @entity {
   owner: ID!
 }
 
-type Sponsor @entity {
+type Supporter @entity {
   id: ID!
   totalAmount: BigDecimal!
-  talents: [SponsorTalentToken!]! @derivedFrom(field: "sponsor")
+  talents: [SupporterTalentToken!]! @derivedFrom(field: "supporter")
 }
 
-type SponsorTalentToken @entity {
+type SupporterTalentToken @entity {
   id: ID!
   talent: TalentToken!
-  sponsor: Sponsor!
+  supporter: Supporter!
   amount: BigDecimal!
   talAmount: BigDecimal!
 }
@@ -45,8 +45,8 @@ type TalentToken @entity {
   # all transactions for this token
   txCount: BigInt!
   # all users that have a tokens
-  sponsorCounter: BigInt!
+  supporterCounter: BigInt!
   # total value locked
   totalValueLocked: BigInt!
-  sponsors: [SponsorTalentToken!]! @derivedFrom(field: "talent")
+  supporters: [SupporterTalentToken!]! @derivedFrom(field: "talent")
 }

@@ -1,5 +1,5 @@
 import { BigInt, BigDecimal } from "@graphprotocol/graph-ts"
-import { TalentFactory, TalentToken, Sponsor, SponsorTalentToken } from "../generated/schema"
+import { TalentFactory, TalentToken, Supporter, SupporterTalentToken } from "../generated/schema"
 import * as TalentTokenTemplates from "../generated/templates/TalentToken/TalentToken"
 import * as Templates from "../generated/templates"
 import { TalentCreated } from "../generated/TalentFactory/TalentFactory"
@@ -30,7 +30,7 @@ export function handleTalentTokenCreated(event: TalentCreated): void {
 
   let talentToken = new TalentToken(event.params.token.toHex())
   talentToken.owner = event.params.talent.toHex()
-  talentToken.sponsorCounter = ZERO_BI
+  talentToken.supporterCounter = ZERO_BI
   talentToken.txCount = ZERO_BI
   talentToken.totalValueLocked = INITIAL_SUPPLY_BI
 
@@ -62,106 +62,106 @@ export function handleStake(event: Stake): void {
   let talentToken = TalentToken.load(event.params.talentToken.toHex())
   if(talentToken === null) {
     talentToken = new TalentToken(event.params.talentToken.toHex())
-    talentToken.sponsorCounter = ZERO_BI
+    talentToken.supporterCounter = ZERO_BI
     talentToken.totalValueLocked = INITIAL_SUPPLY_BI
   }
 
-  talentToken.sponsorCounter = talentToken.sponsorCounter.plus(ONE_BI)
   talentToken.totalValueLocked = talentToken.totalValueLocked.plus(event.params.talAmount)
   talentToken.marketCap = talentToken.marketCap.plus(event.params.talAmount.div(FIVE_BI))
 
-  let sponsor = Sponsor.load(event.params.owner.toHex())
-  if(sponsor === null) {
-    sponsor = new Sponsor(event.params.owner.toHex())
-    sponsor.totalAmount = ZERO_BD
+  let supporter = Supporter.load(event.params.owner.toHex())
+  if(supporter === null) {
+    supporter = new Supporter(event.params.owner.toHex())
+    supporter.totalAmount = ZERO_BD
+    talentToken.supporterCounter = talentToken.supporterCounter.plus(ONE_BI)
   }
 
-  sponsor.totalAmount = sponsor.totalAmount.plus(BigDecimal.fromString(event.params.talAmount.toString()))
+  supporter.totalAmount = supporter.totalAmount.plus(BigDecimal.fromString(event.params.talAmount.toString()))
 
   let relationshipID = event.params.owner.toHexString() + "-" + event.params.talentToken.toHexString()
-  let sponsorTalentRelationship = SponsorTalentToken.load(relationshipID)
-  if (sponsorTalentRelationship === null) {
-    sponsorTalentRelationship = new SponsorTalentToken(relationshipID)
-    sponsorTalentRelationship.sponsor = sponsor.id
-    sponsorTalentRelationship.talent = talentToken.id
-    sponsorTalentRelationship.amount = ZERO_BD
+  let supporterTalentRelationship = SupporterTalentToken.load(relationshipID)
+  if (supporterTalentRelationship === null) {
+    supporterTalentRelationship = new SupporterTalentToken(relationshipID)
+    supporterTalentRelationship.supporter = supporter.id
+    supporterTalentRelationship.talent = talentToken.id
+    supporterTalentRelationship.amount = ZERO_BD
   }
-  sponsorTalentRelationship.talAmount = sponsorTalentRelationship.amount.plus(BigDecimal.fromString(event.params.talAmount.toString()))
-  sponsorTalentRelationship.amount = sponsorTalentRelationship.amount.plus(BigDecimal.fromString(event.params.talAmount.div(FIVE_BI).toString()))
+  supporterTalentRelationship.talAmount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.talAmount.toString()))
+  supporterTalentRelationship.amount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.talAmount.div(FIVE_BI).toString()))
 
   talentToken.save()
-  sponsor.save()
-  sponsorTalentRelationship.save()
+  supporter.save()
+  supporterTalentRelationship.save()
 }
 
 export function handleUnstake(event: Unstake): void {
   let talentToken = TalentToken.load(event.params.talentToken.toHex())
   if(talentToken === null) {
     talentToken = new TalentToken(event.params.talentToken.toHex())
-    talentToken.sponsorCounter = ZERO_BI
+    talentToken.supporterCounter = ZERO_BI
     talentToken.totalValueLocked = ZERO_BI
   }
 
   talentToken.totalValueLocked = talentToken.totalValueLocked.minus(event.params.talAmount)
 
-  let sponsor = Sponsor.load(event.params.owner.toHex())
-  if(sponsor === null) {
-    sponsor = new Sponsor(event.params.owner.toHex())
-    sponsor.totalAmount = ZERO_BD
+  let supporter = Supporter.load(event.params.owner.toHex())
+  if(supporter === null) {
+    supporter = new Supporter(event.params.owner.toHex())
+    supporter.totalAmount = ZERO_BD
   }
 
-  sponsor.totalAmount = sponsor.totalAmount.minus(BigDecimal.fromString(event.params.talAmount.toString()))
+  supporter.totalAmount = supporter.totalAmount.minus(BigDecimal.fromString(event.params.talAmount.toString()))
 
-  if (sponsor.totalAmount <= ZERO_BD) {
-    talentToken.sponsorCounter = talentToken.sponsorCounter.minus(ONE_BI)
+  if (supporter.totalAmount <= ZERO_BD) {
+    talentToken.supporterCounter = talentToken.supporterCounter.minus(ONE_BI)
   }
 
   let relationshipID = event.params.owner.toHexString() + "-" + event.params.talentToken.toHexString()
-  let sponsorTalentRelationship = SponsorTalentToken.load(relationshipID)
-  if (sponsorTalentRelationship === null) {
-    sponsorTalentRelationship = new SponsorTalentToken(relationshipID)
-    sponsorTalentRelationship.sponsor = sponsor.id
-    sponsorTalentRelationship.talent = talentToken.id
-    sponsorTalentRelationship.amount = ZERO_BD
+  let supporterTalentRelationship = SupporterTalentToken.load(relationshipID)
+  if (supporterTalentRelationship === null) {
+    supporterTalentRelationship = new SupporterTalentToken(relationshipID)
+    supporterTalentRelationship.supporter = supporter.id
+    supporterTalentRelationship.talent = talentToken.id
+    supporterTalentRelationship.amount = ZERO_BD
   }
-  sponsorTalentRelationship.amount = sponsorTalentRelationship.amount.minus(BigDecimal.fromString(event.params.talAmount.toString()))
+  supporterTalentRelationship.amount = supporterTalentRelationship.amount.minus(BigDecimal.fromString(event.params.talAmount.toString()))
 
   talentToken.save()
-  sponsor.save()
-  sponsorTalentRelationship.save()
+  supporter.save()
+  supporterTalentRelationship.save()
 }
 
 export function handleRewardClaim(event: RewardClaim): void {
   let talentToken = TalentToken.load(event.params.talentToken.toHex())
   if(talentToken === null) {
     talentToken = new TalentToken(event.params.talentToken.toHex())
-    talentToken.sponsorCounter = ONE_BI
+    talentToken.supporterCounter = ONE_BI
     talentToken.totalValueLocked = INITIAL_SUPPLY_BI
   }
 
   talentToken.totalValueLocked = talentToken.totalValueLocked.plus(event.params.stakerReward)
   talentToken.marketCap = talentToken.marketCap.plus(event.params.stakerReward.div(FIVE_BI))
 
-  let sponsor = Sponsor.load(event.params.owner.toHex())
-  if(sponsor === null) {
-    sponsor = new Sponsor(event.params.owner.toHex())
-    sponsor.totalAmount = ZERO_BD
+  let supporter = Supporter.load(event.params.owner.toHex())
+  if(supporter === null) {
+    supporter = new Supporter(event.params.owner.toHex())
+    supporter.totalAmount = ZERO_BD
   }
 
-  sponsor.totalAmount = sponsor.totalAmount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
+  supporter.totalAmount = supporter.totalAmount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
 
   let relationshipID = event.params.owner.toHexString() + "-" + event.params.talentToken.toHexString()
-  let sponsorTalentRelationship = SponsorTalentToken.load(relationshipID)
-  if (sponsorTalentRelationship === null) {
-    sponsorTalentRelationship = new SponsorTalentToken(relationshipID)
-    sponsorTalentRelationship.sponsor = sponsor.id
-    sponsorTalentRelationship.talent = talentToken.id
-    sponsorTalentRelationship.amount = ZERO_BD
+  let supporterTalentRelationship = SupporterTalentToken.load(relationshipID)
+  if (supporterTalentRelationship === null) {
+    supporterTalentRelationship = new SupporterTalentToken(relationshipID)
+    supporterTalentRelationship.supporter = supporter.id
+    supporterTalentRelationship.talent = talentToken.id
+    supporterTalentRelationship.amount = ZERO_BD
   }
-  sponsorTalentRelationship.talAmount = sponsorTalentRelationship.amount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
-  sponsorTalentRelationship.amount = sponsorTalentRelationship.amount.plus(BigDecimal.fromString(event.params.stakerReward.div(FIVE_BI).toString()))
+  supporterTalentRelationship.talAmount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
+  supporterTalentRelationship.amount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.stakerReward.div(FIVE_BI).toString()))
 
   talentToken.save()
-  sponsor.save()
-  sponsorTalentRelationship.save()
+  supporter.save()
+  supporterTalentRelationship.save()
 }
