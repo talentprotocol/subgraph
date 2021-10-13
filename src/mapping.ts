@@ -73,7 +73,6 @@ export function handleStake(event: Stake): void {
   if(supporter === null) {
     supporter = new Supporter(event.params.owner.toHex())
     supporter.totalAmount = ZERO_BD
-    talentToken.supporterCounter = talentToken.supporterCounter.plus(ONE_BI)
   }
 
   supporter.totalAmount = supporter.totalAmount.plus(BigDecimal.fromString(event.params.talAmount.toString()))
@@ -85,6 +84,7 @@ export function handleStake(event: Stake): void {
     supporterTalentRelationship.supporter = supporter.id
     supporterTalentRelationship.talent = talentToken.id
     supporterTalentRelationship.amount = ZERO_BD
+    talentToken.supporterCounter = talentToken.supporterCounter.plus(ONE_BI)
   }
   supporterTalentRelationship.talAmount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.talAmount.toString()))
   supporterTalentRelationship.amount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.talAmount.div(FIVE_BI).toString()))
