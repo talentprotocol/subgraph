@@ -10,6 +10,7 @@ type TalentFactory @entity {
 type Supporter @entity {
   id: ID!
   totalAmount: BigDecimal!
+  rewardsClaimed: BigDecimal!
   talents: [SupporterTalentToken!]! @derivedFrom(field: "supporter")
 }
 

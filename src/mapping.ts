@@ -109,6 +109,7 @@ export function handleUnstake(event: Unstake): void {
   if(supporter === null) {
     supporter = new Supporter(event.params.owner.toHex())
     supporter.totalAmount = ZERO_BD
+    supporter.rewardsClaimed = ZERO_BD
   }
 
   supporter.totalAmount = supporter.totalAmount.minus(BigDecimal.fromString(event.params.talAmount.toString()))
@@ -147,9 +148,11 @@ export function handleRewardClaim(event: RewardClaim): void {
   if(supporter === null) {
     supporter = new Supporter(event.params.owner.toHex())
     supporter.totalAmount = ZERO_BD
+    supporter.rewardsClaimed = ZERO_BD
   }
 
   supporter.totalAmount = supporter.totalAmount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
+  supporter.rewardsClaimed = supporter.rewardsClaimed.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
 
   let relationshipID = event.params.owner.toHexString() + "-" + event.params.talentToken.toHexString()
   let supporterTalentRelationship = SupporterTalentToken.load(relationshipID)
