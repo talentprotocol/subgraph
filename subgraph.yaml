@@ -4,9 +4,9 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: TalentFactory
-    network: celo-alfajores
+    network: celo
     source:
-      address: "0xE6A0829535C76bA3d1A69a27381Ee08c772Cb837"
+      address: "0xa902DA7a40a671B84bA3Dd0BdBA6FD9d2D888246"
       abi: TalentFactory
       startBlock: 7497000
     mapping:
@@ -24,9 +24,9 @@ dataSources:
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: Staking
-    network: celo-alfajores
+    network: celo
     source:
-      address: "0x3c9260F62679b3D08648346223572A8BF3f89fA8"
+      address: "0x8ea91a982d93836415CE3abbaf12d59fb8cE3Ff8"
       abi: Staking
       startBlock: 7497000
     mapping:
@@ -49,7 +49,7 @@ dataSources:
 templates:
   - name: TalentToken
     kind: ethereum/contract
-    network: celo-alfajores
+    network: celo
     source:
       abi: TalentToken
     mapping:
