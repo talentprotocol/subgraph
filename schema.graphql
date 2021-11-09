@@ -39,6 +39,10 @@ type TalentToken @entity {
   totalSupply: BigInt!
   # market cap
   marketCap: BigInt!
+  # rewards that are ready to be claimed
+  rewardsReady: BigDecimal!
+  # rewards that have already been claimed
+  rewardsClaimed: BigDecimal!
   # creation
   createdAtTimestamp: BigInt!
   # block stake was created at

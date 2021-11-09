@@ -31,7 +31,9 @@ export function handleTalentTokenCreated(event: TalentCreated): void {
   talentToken.supporterCounter = ZERO_BI
   talentToken.txCount = ZERO_BI
   talentToken.totalValueLocked = INITIAL_SUPPLY_BI
-  talentToken.marketCap = INITIAL_SUPPLY_BI.div(FIVE_BI);
+  talentToken.marketCap = INITIAL_SUPPLY_BI.div(FIVE_BI)
+  talentToken.rewardsReady = ZERO_BD
+  talentToken.rewardsClaimed = ZERO_BD
 
   Templates.TalentToken.create(event.params.token)
 
@@ -64,6 +66,8 @@ export function handleStake(event: Stake): void {
     talentToken.supporterCounter = ZERO_BI
     talentToken.totalValueLocked = INITIAL_SUPPLY_BI
     talentToken.marketCap = INITIAL_SUPPLY_BI.div(FIVE_BI)
+    talentToken.rewardsReady = ZERO_BD
+    talentToken.rewardsClaimed = ZERO_BD
   }
 
   talentToken.totalValueLocked = talentToken.totalValueLocked.plus(event.params.talAmount)
@@ -84,9 +88,10 @@ export function handleStake(event: Stake): void {
     supporterTalentRelationship.supporter = supporter.id
     supporterTalentRelationship.talent = talentToken.id
     supporterTalentRelationship.amount = ZERO_BD
+    supporterTalentRelationship.talAmount = ZERO_BD
     talentToken.supporterCounter = talentToken.supporterCounter.plus(ONE_BI)
   }
-  supporterTalentRelationship.talAmount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.talAmount.toString()))
+  supporterTalentRelationship.talAmount = supporterTalentRelationship.talAmount.plus(BigDecimal.fromString(event.params.talAmount.toString()))
   supporterTalentRelationship.amount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.talAmount.div(FIVE_BI).toString()))
 
   talentToken.save()
@@ -101,6 +106,8 @@ export function handleUnstake(event: Unstake): void {
     talentToken.supporterCounter = ZERO_BI
     talentToken.totalValueLocked = INITIAL_SUPPLY_BI
     talentToken.marketCap = INITIAL_SUPPLY_BI.div(FIVE_BI)
+    talentToken.rewardsReady = ZERO_BD
+    talentToken.rewardsClaimed = ZERO_BD
   }
 
   talentToken.totalValueLocked = talentToken.totalValueLocked.minus(event.params.talAmount)
@@ -125,8 +132,11 @@ export function handleUnstake(event: Unstake): void {
     supporterTalentRelationship.supporter = supporter.id
     supporterTalentRelationship.talent = talentToken.id
     supporterTalentRelationship.amount = ZERO_BD
+    supporterTalentRelationship.talAmount = ZERO_BD
   }
-  supporterTalentRelationship.amount = supporterTalentRelationship.amount.minus(BigDecimal.fromString(event.params.talAmount.toString()))
+
+  supporterTalentRelationship.talAmount = supporterTalentRelationship.talAmount.minus(BigDecimal.fromString(event.params.talAmount.toString()))
+  supporterTalentRelationship.amount = supporterTalentRelationship.amount.minus(BigDecimal.fromString(event.params.talAmount.div(FIVE_BI).toString()))
 
   talentToken.save()
   supporter.save()
@@ -139,6 +149,8 @@ export function handleRewardClaim(event: RewardClaim): void {
     talentToken = new TalentToken(event.params.talentToken.toHex())
     talentToken.supporterCounter = ONE_BI
     talentToken.totalValueLocked = INITIAL_SUPPLY_BI
+    talentToken.rewardsReady = ZERO_BD
+    talentToken.rewardsClaimed = ZERO_BD
   }
 
   talentToken.totalValueLocked = talentToken.totalValueLocked.plus(event.params.stakerReward)
@@ -154,6 +166,8 @@ export function handleRewardClaim(event: RewardClaim): void {
   supporter.totalAmount = supporter.totalAmount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
   supporter.rewardsClaimed = supporter.rewardsClaimed.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
 
+  talentToken.rewardsReady = talentToken.rewardsReady.plus(BigDecimal.fromString(event.params.talentReward.toString()))
+
   let relationshipID = event.params.owner.toHexString() + "-" + event.params.talentToken.toHexString()
   let supporterTalentRelationship = SupporterTalentToken.load(relationshipID)
   if (supporterTalentRelationship === null) {
@@ -162,7 +176,7 @@ export function handleRewardClaim(event: RewardClaim): void {
     supporterTalentRelationship.talent = talentToken.id
     supporterTalentRelationship.amount = ZERO_BD
   }
-  supporterTalentRelationship.talAmount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
+  supporterTalentRelationship.talAmount = supporterTalentRelationship.talAmount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
   supporterTalentRelationship.amount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.stakerReward.div(FIVE_BI).toString()))
 
   talentToken.save()
