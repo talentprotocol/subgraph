@@ -89,8 +89,11 @@ export function handleStake(event: Stake): void {
     supporterTalentRelationship.talent = talentToken.id
     supporterTalentRelationship.amount = ZERO_BD
     supporterTalentRelationship.talAmount = ZERO_BD
+    supporterTalentRelationship.firstTimeBoughtAt = event.block.timestamp
     talentToken.supporterCounter = talentToken.supporterCounter.plus(ONE_BI)
   }
+
+  supporterTalentRelationship.lastTimeBoughtAt = event.block.timestamp
   supporterTalentRelationship.talAmount = supporterTalentRelationship.talAmount.plus(BigDecimal.fromString(event.params.talAmount.toString()))
   supporterTalentRelationship.amount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.talAmount.div(FIVE_BI).toString()))
 
@@ -178,6 +181,7 @@ export function handleRewardClaim(event: RewardClaim): void {
   }
   supporterTalentRelationship.talAmount = supporterTalentRelationship.talAmount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
   supporterTalentRelationship.amount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.stakerReward.div(FIVE_BI).toString()))
+  supporterTalentRelationship.lastTimeBoughtAt = event.block.timestamp
 
   talentToken.save()
   supporter.save()

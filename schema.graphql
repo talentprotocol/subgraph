@@ -20,6 +20,8 @@ type SupporterTalentToken @entity {
   supporter: Supporter!
   amount: BigDecimal!
   talAmount: BigDecimal!
+  firstTimeBoughtAt: BigInt!
+  lastTimeBoughtAt: BigInt!
 }
 
 type TalentToken @entity {
