@@ -1,5 +1,5 @@
 import { BigInt, BigDecimal } from "@graphprotocol/graph-ts"
-import { TalentFactory, TalentToken, Supporter, SupporterTalentToken } from "../generated/schema"
+import { TalentFactory, TalentToken, Supporter, SupporterTalentToken, TalentTokenDayData } from "../generated/schema"
 import * as TalentTokenTemplates from "../generated/templates/TalentToken/TalentToken"
 import * as Templates from "../generated/templates"
 import { TalentCreated } from "../generated/TalentFactory/TalentFactory"
@@ -57,6 +57,8 @@ export function handleTransfer(event: Transfer): void {
   talentToken.txCount = talentToken.txCount.plus(ONE_BI);
 
   talentToken.save()
+
+  updateTalentDayData(event)
 }
 
 export function handleStake(event: Stake): void {
@@ -186,4 +188,26 @@ export function handleRewardClaim(event: RewardClaim): void {
   talentToken.save()
   supporter.save()
   supporterTalentRelationship.save()
+}
+
+function updateTalentDayData(event: Transfer): void {
+  let timestamp = event.block.timestamp.toI32();
+  let dayID = timestamp / 86400;
+  let dayStartTimestamp = dayID * 86400;
+
+  let talentToken = TalentToken.load(event.address.toHex())
+  if (talentToken === null) {
+    talentToken = new TalentToken(event.address.toHex())
+  }
+  const tokenDayDataId = event.address.toHex().concat('-').concat(BigInt.fromI32(dayID).toString())
+  let talentDayData = TalentTokenDayData.load(tokenDayDataId);
+  if (talentDayData === null) {
+    talentDayData = new TalentTokenDayData(tokenDayDataId);
+    talentDayData.date = dayStartTimestamp;
+    talentDayData.dailySupply = ZERO_BI;
+    talentDayData.talent = talentToken.id
+  }
+  talentDayData.dailySupply = talentToken.totalSupply;
+  talentDayData.save();
+
 }
