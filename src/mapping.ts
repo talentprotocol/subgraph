@@ -195,19 +195,22 @@ function updateTalentDayData(event: Transfer): void {
   let dayID = timestamp / 86400;
   let dayStartTimestamp = dayID * 86400;
 
-  let talentToken = TalentToken.load(event.address.toHex())
+  const talentTokenAddress = event.address.toHex();
+  let talentToken = TalentToken.load(talentTokenAddress);
   if (talentToken === null) {
-    talentToken = new TalentToken(event.address.toHex())
+    talentToken = new TalentToken(talentTokenAddress);
   }
-  const tokenDayDataId = event.address.toHex().concat('-').concat(BigInt.fromI32(dayID).toString())
+
+  const tokenDayDataId = talentTokenAddress
+    .concat("-")
+    .concat(BigInt.fromI32(dayID).toString());
   let talentDayData = TalentTokenDayData.load(tokenDayDataId);
   if (talentDayData === null) {
     talentDayData = new TalentTokenDayData(tokenDayDataId);
     talentDayData.date = dayStartTimestamp;
     talentDayData.dailySupply = ZERO_BI;
-    talentDayData.talent = talentToken.id
+    talentDayData.talent = talentToken.id;
   }
   talentDayData.dailySupply = talentToken.totalSupply;
   talentDayData.save();
-
 }
