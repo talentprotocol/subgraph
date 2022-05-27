@@ -34,6 +34,7 @@ export function handleTalentTokenCreated(event: TalentCreated): void {
   talentToken.marketCap = INITIAL_SUPPLY_BI.div(FIVE_BI)
   talentToken.rewardsReady = ZERO_BD
   talentToken.rewardsClaimed = ZERO_BD
+  talentToken.createdAtTimestamp = event.block.timestamp;
 
   Templates.TalentToken.create(event.params.token)
 
