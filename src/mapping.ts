@@ -6,7 +6,7 @@ import { TalentCreated } from "../generated/TalentFactory/TalentFactory"
 import { Transfer } from "../generated/templates/TalentToken/TalentToken"
 import { Stake, Unstake, RewardClaim } from "../generated/Staking/Staking"
 
-const FACTORY_ADDRESS = '0xcF2b5dd4367B083d495Cfc4332b0970464ee1472'
+const FACTORY_ADDRESS = '0xa902DA7a40a671B84bA3Dd0BdBA6FD9d2D888246'
 const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 const ZERO_BI = BigInt.fromI32(0)
 const ONE_BI = BigInt.fromI32(1)
@@ -181,6 +181,7 @@ export function handleRewardClaim(event: RewardClaim): void {
     supporterTalentRelationship.supporter = supporter.id
     supporterTalentRelationship.talent = talentToken.id
     supporterTalentRelationship.amount = ZERO_BD
+    talentToken.supporterCounter = talentToken.supporterCounter.plus(ONE_BI)
   }
   supporterTalentRelationship.talAmount = supporterTalentRelationship.talAmount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
   supporterTalentRelationship.amount = supporterTalentRelationship.amount.plus(BigDecimal.fromString(event.params.stakerReward.div(FIVE_BI).toString()))
