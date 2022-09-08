@@ -45,6 +45,8 @@ dataSources:
           handler: handleUnstake
         - event: RewardClaim(indexed address,indexed address,uint256,uint256)
           handler: handleRewardClaim
+        - event: StakeTransferred(indexed address,indexed address,indexed address)
+          handler: handleStakeOwnershipChange
       file: ./src/mapping.ts
 templates:
   - name: TalentToken

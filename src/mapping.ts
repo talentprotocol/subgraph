@@ -4,7 +4,7 @@ import * as TalentTokenTemplates from "../generated/templates/TalentToken/Talent
 import * as Templates from "../generated/templates"
 import { TalentCreated } from "../generated/TalentFactory/TalentFactory"
 import { Transfer } from "../generated/templates/TalentToken/TalentToken"
-import { Stake, Unstake, RewardClaim } from "../generated/Staking/Staking"
+import { Stake, Unstake, RewardClaim, StakeTransferred } from "../generated/Staking/Staking"
 
 const FACTORY_ADDRESS = '0xa902DA7a40a671B84bA3Dd0BdBA6FD9d2D888246'
 const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
@@ -215,4 +215,66 @@ function updateTalentDayData(event: Transfer): void {
   }
   talentDayData.dailySupply = talentToken.totalSupply;
   talentDayData.save();
+}
+
+export function handleStakeOwnershipChange(event: StakeTransferred): void {
+  let talentToken = TalentToken.load(event.params.talent.toHex())
+  let supporter = Supporter.load(event.params.owner.toHex());
+  let newSupporter = Supporter.load(event.params.newOwner.toHex());
+
+  if (newSupporter == null) {
+    newSupporter = new Supporter(event.params.newOwner.toHex())
+    newSupporter.totalAmount = ZERO_BD
+    newSupporter.rewardsClaimed = ZERO_BD
+  }
+
+  if (talentToken === null) {
+    talentToken = new TalentToken(event.params.talent.toHex())
+    talentToken.supporterCounter = ONE_BI
+    talentToken.totalValueLocked = INITIAL_SUPPLY_BI
+    talentToken.rewardsReady = ZERO_BD
+    talentToken.rewardsClaimed = ZERO_BD
+  }
+
+  if (supporter === null) {
+    supporter = new Supporter(event.params.owner.toHex())
+    supporter.totalAmount = ZERO_BD
+    supporter.rewardsClaimed = ZERO_BD
+  }
+
+  let relationshipID = event.params.owner.toHexString() + "-" + event.params.talent.toHexString();
+  let ownerTalentRelationship = SupporterTalentToken.load(relationshipID)
+
+  if (ownerTalentRelationship === null) {
+    ownerTalentRelationship = new SupporterTalentToken(relationshipID)
+    ownerTalentRelationship.supporter = supporter.id
+    ownerTalentRelationship.talent = talentToken.id
+    ownerTalentRelationship.amount = ZERO_BD
+  }
+
+  let newRelationshipID = event.params.newOwner.toHexString() + "-" + event.params.talent.toHexString();
+  let newOwnerTalentRelationship = SupporterTalentToken.load(newRelationshipID)
+
+  if (newOwnerTalentRelationship == null) {
+    newOwnerTalentRelationship = new SupporterTalentToken(newRelationshipID)
+    newOwnerTalentRelationship.supporter = newSupporter.id
+    newOwnerTalentRelationship.talent = talentToken.id
+    newOwnerTalentRelationship.amount = ownerTalentRelationship.amount
+    newOwnerTalentRelationship.talAmount = ownerTalentRelationship.talAmount
+    newOwnerTalentRelationship.firstTimeBoughtAt = ownerTalentRelationship.firstTimeBoughtAt
+    newOwnerTalentRelationship.lastTimeBoughtAt = ownerTalentRelationship.lastTimeBoughtAt
+  } else {
+    newOwnerTalentRelationship.amount = newOwnerTalentRelationship.amount.plus(ownerTalentRelationship.amount)
+    newOwnerTalentRelationship.talAmount = newOwnerTalentRelationship.talAmount.plus(ownerTalentRelationship.talAmount)
+    talentToken.supporterCounter = talentToken.supporterCounter.minus(ONE_BI)
+  }
+
+  newSupporter.totalAmount = newSupporter.totalAmount.plus(ownerTalentRelationship.talAmount)
+  supporter.totalAmount = supporter.totalAmount.minus(ownerTalentRelationship.talAmount)
+
+  newSupporter.save()
+  newOwnerTalentRelationship.save()
+  talentToken.save()
+  supporter.save()
+  ownerTalentRelationship.unset(relationshipID)
 }
