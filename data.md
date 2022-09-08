@@ -36,6 +36,10 @@ Staking
 ## Matic
 
 network
+  matic
 startBlock
+  32847300
 TalentFactory
+  0x8Db20Bc35b3AB78CbCC27c1674a26780cBB80918
 Staking
+  0xb477A9BD2547ad61f4Ac22113172Dd909E5B2331
