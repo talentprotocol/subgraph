@@ -181,6 +181,7 @@ export function handleRewardClaim(event: RewardClaim): void {
     supporterTalentRelationship.supporter = supporter.id
     supporterTalentRelationship.talent = talentToken.id
     supporterTalentRelationship.amount = ZERO_BD
+    supporterTalentRelationship.firstTimeBoughtAt = event.block.timestamp
     talentToken.supporterCounter = talentToken.supporterCounter.plus(ONE_BI)
   }
   supporterTalentRelationship.talAmount = supporterTalentRelationship.talAmount.plus(BigDecimal.fromString(event.params.stakerReward.toString()))
