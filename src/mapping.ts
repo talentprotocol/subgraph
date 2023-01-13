@@ -217,3 +217,17 @@ function updateTalentDayData(event: Transfer): void {
   talentDayData.dailySupply = talentToken.totalSupply;
   talentDayData.save();
 }
+
+function handleTalentNetworkTransfer(event: TalentDisabledForNetworkTransfer): void{
+  let talentToken = TalentToken.load(event.params.talent.toHex())
+  talentToken.supporters.forEach(supporter => {
+    supporter.supporter.totalAmount = supporter.supporter.totalAmount.minues(supporter.talAmount)
+    supporter.talAmount = 0
+    supporter.supporter.save()
+    supporter.save()
+  });
+  talentToken.disabled = true
+  talentToken.save()
+  // when token is deployed isMigrated will be true then previous chain token supporters will be migrated to new chain
+
+}

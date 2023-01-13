@@ -45,6 +45,8 @@ dataSources:
           handler: handleUnstake
         - event: RewardClaim(indexed address,indexed address,uint256,uint256)
           handler: handleRewardClaim
+        - event: TalentDisabledForNetworkTransfer(indexed address, unint256)
+          handler: handleTalentNetworkTransfer
       file: ./src/mapping.ts
 templates:
   - name: TalentToken
