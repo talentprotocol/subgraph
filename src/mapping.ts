@@ -5,9 +5,8 @@ import * as Templates from "../generated/templates"
 import { TalentCreated } from "../generated/TalentFactory/TalentFactory"
 import { Transfer } from "../generated/templates/TalentToken/TalentToken"
 import { Stake, Unstake, RewardClaim, TalentDisabledForNetworkTransfer } from "../generated/Staking/Staking"
-import { log } from '@graphprotocol/graph-ts'
 
-const FACTORY_ADDRESS = '0x7F93b4AED8d7c61C9D00dDD44BE32b1ab890C397'
+const FACTORY_ADDRESS = '0xa902DA7a40a671B84bA3Dd0BdBA6FD9d2D888246'
 const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 const ZERO_BI = BigInt.fromI32(0)
 const ONE_BI = BigInt.fromI32(1)
