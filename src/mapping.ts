@@ -4,7 +4,7 @@ import * as TalentTokenTemplates from "../generated/templates/TalentToken/Talent
 import * as Templates from "../generated/templates"
 import { TalentCreated } from "../generated/TalentFactory/TalentFactory"
 import { Transfer } from "../generated/templates/TalentToken/TalentToken"
-import { Stake, Unstake, RewardClaim } from "../generated/Staking/Staking"
+import { Stake, Unstake, RewardClaim, TalentDisabledForNetworkTransfer } from "../generated/Staking/Staking"
 
 const FACTORY_ADDRESS = '0xa902DA7a40a671B84bA3Dd0BdBA6FD9d2D888246'
 const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
@@ -216,4 +216,42 @@ function updateTalentDayData(event: Transfer): void {
   }
   talentDayData.dailySupply = talentToken.totalSupply;
   talentDayData.save();
+}
+
+export function handleTalentNetworkTransfer(event: TalentDisabledForNetworkTransfer): void{
+  const talentAddress = event.params.talent.toHex()
+  let talentToken = TalentToken.load(talentAddress)
+  if (talentToken === null) {
+    talentToken = new TalentToken(talentAddress);
+    talentToken.supporterCounter = ONE_BI
+    talentToken.totalValueLocked = INITIAL_SUPPLY_BI
+    talentToken.rewardsReady = ZERO_BD
+    talentToken.rewardsClaimed = ZERO_BD
+  }
+  talentToken.disabled = true
+
+  for (let i = 0; i < talentToken.supporters.length; i++) {
+    const talentSupporterId = talentToken.supporters[i];
+    const supporterAddress = talentSupporterId.split('-')[0]
+    let supporter = Supporter.load(supporterAddress)
+    if(supporter === null) {
+      supporter = new Supporter(supporterAddress)
+      supporter.totalAmount = ZERO_BD
+      supporter.rewardsClaimed = ZERO_BD
+    }
+    
+    let talentSupporter = SupporterTalentToken.load(talentSupporterId)
+    if (talentSupporter === null) {
+      talentSupporter = new SupporterTalentToken(talentSupporterId)
+      talentSupporter.amount = ZERO_BD
+      talentSupporter.supporter = supporter.id
+      talentSupporter.talent = talentToken.id
+    }
+    supporter.totalAmount = supporter.totalAmount > ZERO_BD ? supporter.totalAmount.minus(talentSupporter.talAmount) : ZERO_BD;
+    talentSupporter.talAmount = ZERO_BD;
+    supporter.save();
+    talentSupporter.save();
+  }
+  talentToken.save();
+  
 }
