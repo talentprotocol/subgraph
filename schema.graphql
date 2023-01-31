@@ -56,7 +56,7 @@ type TalentToken @entity {
   # total value locked
   totalValueLocked: BigInt!
   # if token is disabled
-  disabled: bool
+  disabled: Boolean!
   supporters: [SupporterTalentToken!]! @derivedFrom(field: "talent")
   # daily price for this token
   tokenDayData: [TalentTokenDayData!]! @derivedFrom(field: "talent")

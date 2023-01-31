@@ -697,6 +697,29 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "_talent",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_stakeholders",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_stakeAmounts",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "migrateStakes",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       },

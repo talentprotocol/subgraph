@@ -4,9 +4,9 @@ import * as TalentTokenTemplates from "../generated/templates/TalentToken/Talent
 import * as Templates from "../generated/templates"
 import { TalentCreated } from "../generated/TalentFactory/TalentFactory"
 import { Transfer } from "../generated/templates/TalentToken/TalentToken"
-import { Stake, Unstake, RewardClaim } from "../generated/Staking/Staking"
+import { Stake, Unstake, RewardClaim, TalentDisabledForNetworkTransfer } from "../generated/Staking/Staking"
 
-const FACTORY_ADDRESS = '0xa902DA7a40a671B84bA3Dd0BdBA6FD9d2D888246'
+const FACTORY_ADDRESS = '0x7F93b4AED8d7c61C9D00dDD44BE32b1ab890C397'
 const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 const ZERO_BI = BigInt.fromI32(0)
 const ONE_BI = BigInt.fromI32(1)
@@ -218,16 +218,38 @@ function updateTalentDayData(event: Transfer): void {
   talentDayData.save();
 }
 
-function handleTalentNetworkTransfer(event: TalentDisabledForNetworkTransfer): void{
+export function handleTalentNetworkTransfer(event: TalentDisabledForNetworkTransfer): void{
   let talentToken = TalentToken.load(event.params.talent.toHex())
-  talentToken.supporters.forEach(supporter => {
-    supporter.supporter.totalAmount = supporter.supporter.totalAmount.minues(supporter.talAmount)
-    supporter.talAmount = 0
-    supporter.supporter.save()
-    supporter.save()
-  });
+  if (talentToken === null) {
+    talentToken = new TalentToken(event.params.talent.toHex());
+    talentToken.supporterCounter = ONE_BI
+    talentToken.totalValueLocked = INITIAL_SUPPLY_BI
+    talentToken.rewardsReady = ZERO_BD
+    talentToken.rewardsClaimed = ZERO_BD
+  }
   talentToken.disabled = true
   talentToken.save()
-  // when token is deployed isMigrated will be true then previous chain token supporters will be migrated to new chain
 
+  talentToken.supporters.forEach(talentSupporterId => {
+    const supporterAddress = talentSupporterId.split('-')[0]
+    let supporter = Supporter.load(supporterAddress)
+    if(supporter === null) {
+      supporter = new Supporter(supporterAddress)
+      supporter.totalAmount = ZERO_BD
+      supporter.rewardsClaimed = ZERO_BD
+    }
+
+    let talentSupporter = SupporterTalentToken.load(talentSupporterId)
+    if (talentSupporter === null) {
+      talentSupporter = new SupporterTalentToken(talentSupporterId)
+      talentSupporter.amount = ZERO_BD
+      talentSupporter.supporter = supporter.id
+    }
+
+    supporter.totalAmount = supporter.totalAmount > ZERO_BD ? supporter.totalAmount.minus(supporter.totalAmount) : ZERO_BD;
+    talentSupporter.talAmount = ZERO_BD;
+    supporter.save();
+    talentSupporter.save();
+  });
+  
 }
