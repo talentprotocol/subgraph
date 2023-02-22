@@ -1,12 +1,12 @@
 import { BigInt, BigDecimal } from "@graphprotocol/graph-ts"
-import { TalentFactory, TalentToken, Supporter, SupporterTalentToken, TalentTokenDayData } from "../generated/schema"
-import * as TalentTokenTemplates from "../generated/templates/TalentToken/TalentToken"
+import { TalentFactory, Supporter, TalentToken, SupporterTalentToken, TalentTokenDayData } from "../generated/schema"
+import * as TalentTokenTemplates from "../generated/templates/TalentToken/TalentTokenV3"
 import * as Templates from "../generated/templates"
-import { TalentCreated } from "../generated/TalentFactory/TalentFactory"
-import { Transfer } from "../generated/templates/TalentToken/TalentToken"
-import { Stake, Unstake, RewardClaim } from "../generated/Staking/Staking"
+import { TalentCreated } from "../generated/TalentFactory/TalentFactoryV3"
+import { Transfer } from "../generated/templates/TalentToken/TalentTokenV3"
+import { Stake, Unstake, RewardClaim } from "../generated/Staking/StakingMigrationV2"
 
-const FACTORY_ADDRESS = '0xa902DA7a40a671B84bA3Dd0BdBA6FD9d2D888246'
+const FACTORY_ADDRESS = '0xA91b75E8aA2Dc62B2957333B1a1412532444FdE0'
 const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 const ZERO_BI = BigInt.fromI32(0)
 const ONE_BI = BigInt.fromI32(1)
@@ -43,7 +43,7 @@ export function handleTalentTokenCreated(event: TalentCreated): void {
 }
 
 export function handleTransfer(event: Transfer): void {
-  let contract = TalentTokenTemplates.TalentToken.bind(event.address)
+  let contract = TalentTokenTemplates.TalentTokenV3.bind(event.address)
 
   let talentToken = TalentToken.load(event.address.toHex())
   if(talentToken === null) {
