@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: TalentFactory
-    network: matic
+    network: mumbai
     source:
-      address: "0xA91b75E8aA2Dc62B2957333B1a1412532444FdE0"
+      address: "0x33f8FB8C3cA4465Ca02899145b4489b8eDf3A2FD"
       abi: TalentFactoryV3
-      startBlock: 40612607
+      startBlock: 34766222
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -24,11 +24,11 @@ dataSources:
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: Staking
-    network: matic
+    network: mumbai
     source:
-      address: "0xEa998Ff9c0c075cD035b25095D1833E5aF0aF873"
-      abi: StakingMigrationV2
-      startBlock: 40823976
+      address: "0x4C1A1DaaEc0a1660359F83D76571f4b000eC7DA6"
+      abi: StakingV3
+      startBlock: 34766222
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -36,8 +36,10 @@ dataSources:
       entities:
         - Talent
       abis:
-        - name: StakingMigrationV2
-          file: ./abis/StakingMigrationV2.json
+        - name: StakingV3
+          file: ./abis/StakingV3.json
+        - name: TalentTokenV3
+          file: ./abis/TalentTokenV3.json
       eventHandlers:
         - event: Stake(indexed address,indexed address,uint256,bool)
           handler: handleStake
@@ -47,7 +49,7 @@ dataSources:
 templates:
   - name: TalentToken
     kind: ethereum/contract
-    network: matic
+    network: mumbai
     source:
       abi: TalentTokenV3
     mapping:
