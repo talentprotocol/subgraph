@@ -4,9 +4,29 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: TalentFactory
-    network: celo-alfajores
+    network: matic
     source:
-      address: "0xE6A0829535C76bA3d1A69a27381Ee08c772Cb837"
+      address: "0xA91b75E8aA2Dc62B2957333B1a1412532444FdE0"
+      abi: TalentFactory
+      startBlock: 40612607
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Talent
+      abis:
+        - name: TalentFactory
+          file: ./abis/TalentFactory.json
+      eventHandlers:
+        - event: TalentCreated(indexed address,indexed address)
+          handler: handleTalentTokenCreated
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: TalentFactoryOld
+    network: matic
+    source:
+      address: "0xbbfeda7c4d8d9df752542b03cdd715f790b32d0b"
       abi: TalentFactory
       startBlock: 7497000
     mapping:
@@ -24,11 +44,11 @@ dataSources:
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: Staking
-    network: celo-alfajores
+    network: matic
     source:
-      address: "0x3c9260F62679b3D08648346223572A8BF3f89fA8"
+      address: "0xEa998Ff9c0c075cD035b25095D1833E5aF0aF873"
       abi: Staking
-      startBlock: 7497000
+      startBlock: 40823976
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -49,7 +69,7 @@ dataSources:
 templates:
   - name: TalentToken
     kind: ethereum/contract
-    network: celo-alfajores
+    network: matic
     source:
       abi: TalentToken
     mapping:
