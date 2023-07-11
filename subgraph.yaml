@@ -1,67 +1,67 @@
-specVersion: 0.0.2
+specVersion: 0.0.4
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: TalentFactory
-    network: celo-alfajores
+    network: mumbai
     source:
-      address: "0xE6A0829535C76bA3d1A69a27381Ee08c772Cb837"
-      abi: TalentFactory
-      startBlock: 7497000
+      address: "0x33f8FB8C3cA4465Ca02899145b4489b8eDf3A2FD"
+      abi: TalentFactoryV3
+      startBlock: 34766222
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Talent
       abis:
-        - name: TalentFactory
-          file: ./abis/TalentFactory.json
+        - name: TalentFactoryV3
+          file: ./abis/TalentFactoryV3.json
       eventHandlers:
         - event: TalentCreated(indexed address,indexed address)
           handler: handleTalentTokenCreated
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: Staking
-    network: celo-alfajores
+    network: mumbai
     source:
-      address: "0x3c9260F62679b3D08648346223572A8BF3f89fA8"
-      abi: Staking
-      startBlock: 7497000
+      address: "0x4C1A1DaaEc0a1660359F83D76571f4b000eC7DA6"
+      abi: StakingV3
+      startBlock: 34766222
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Talent
       abis:
-        - name: Staking
-          file: ./abis/Staking.json
+        - name: StakingV3
+          file: ./abis/StakingV3.json
+        - name: TalentTokenV3
+          file: ./abis/TalentTokenV3.json
       eventHandlers:
         - event: Stake(indexed address,indexed address,uint256,bool)
           handler: handleStake
         - event: Unstake(indexed address,indexed address,uint256)
           handler: handleUnstake
-        - event: RewardClaim(indexed address,indexed address,uint256,uint256)
-          handler: handleRewardClaim
       file: ./src/mapping.ts
 templates:
   - name: TalentToken
     kind: ethereum/contract
-    network: celo-alfajores
+    network: mumbai
     source:
-      abi: TalentToken
+      abi: TalentTokenV3
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: ./src/mapping.ts
       entities:
-        - TalentToken
+        - TalentTokenV3
       abis:
-        - name: TalentToken
-          file: ./abis/TalentToken.json
+        - name: TalentTokenV3
+          file: ./abis/TalentTokenV3.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
